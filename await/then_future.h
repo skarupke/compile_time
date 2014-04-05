@@ -240,7 +240,7 @@ struct then_future
 
 	bool valid() const
 	{
-		return state;
+		return bool(state);
 	}
 	T get()
 	{

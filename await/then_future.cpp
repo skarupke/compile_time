@@ -217,5 +217,17 @@ TEST(then_future, movable)
 	promise.set_value();
 	ASSERT_EQ(5, future.get());
 }
+TEST(then_future, valid)
+{
+	ScopedAssertNoLeaks assert_no_leaks;
+	then_promise<void> promise;
+	then_future<void> future;
+	ASSERT_FALSE(future.valid());
+	future = promise.get_future();
+	ASSERT_TRUE(future.valid());
+	then_future<void> then = future.then([](then_future<void> &){});
+	ASSERT_FALSE(future.valid());
+	ASSERT_TRUE(then.valid());
+}
 }
 #endif

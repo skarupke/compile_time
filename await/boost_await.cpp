@@ -2,6 +2,8 @@
 #ifdef USE_BOOST_AWAIT
 #	include "boost_await.h"
 #	define async(...) boost::async(__VA_ARGS__)
+concurrent_queue<Task> main_tasks;
+thread_local std::stack<CurrentCoro> coro_stack;
 #else
 #	include "await.h"
 #	define asynchronous(...) resumable(__VA_ARGS__)

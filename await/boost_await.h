@@ -73,7 +73,7 @@ public:
 };
 
 typedef std::function<void()> Task;
-concurrent_queue<Task> main_tasks;
+extern concurrent_queue<Task> main_tasks;
 // ___________________________________________________________ //
 
 typedef boost::coroutines::coroutine<void()> Coro;
@@ -82,7 +82,7 @@ struct CurrentCoro
 	std::shared_ptr<Coro> coro;
 	Coro::caller_type *caller;
 };
-thread_local std::stack<CurrentCoro> coro_stack;
+extern thread_local std::stack<CurrentCoro> coro_stack;
 
 template<typename F>
 auto asynchronous(F f) -> boost::future<decltype(f())>
