@@ -26,6 +26,41 @@ For more information, please refer to <http://unlicense.org/>
  */
 #include "coroutine.h"
 
+namespace coro
+{
+coroutine::self::self(coroutine & owner)
+	: owner(&owner)
+{
+}
+coroutine::coroutine(coroutine_stack stack)
+	: func()
+	, stack(std::move(stack))
+	, stack_context(this->stack.get(), this->stack.size(), &coroutine_start, this)
+	, run_state(UNINITIALIZED)
+{
+}
+coroutine::coroutine(func::movable_function<void (self &)> func, coroutine_stack stack)
+	: func(std::move(func))
+	, stack(std::move(stack))
+	, stack_context(this->stack.get(), this->stack.size(), &coroutine_start, this)
+	, run_state(NOT_STARTED)
+{
+}
+coroutine::~coroutine()
+{
+	CORO_ASSERT(run_state != RUNNING);
+}
+
+void coroutine::reset(func::movable_function<void (self &)> func)
+{
+	CORO_ASSERT(run_state != RUNNING);
+	stack_context.reset(stack.get(), stack.size(), &coroutine_start, this);
+	run_state = NOT_STARTED;
+	this->func = std::move(func);
+}
+}
+
+
 #ifndef DISABLE_GTEST
 #include <gtest/gtest.h>
 

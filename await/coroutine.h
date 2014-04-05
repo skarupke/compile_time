@@ -106,40 +106,16 @@ struct coroutine
 		}
 
 	private:
-		self(coroutine & owner)
-			: owner(&owner)
-		{
-		}
+		self(coroutine & owner);
 		coroutine * owner;
 		friend struct coroutine;
 	};
 
-	explicit coroutine(coroutine_stack stack = coroutine_stack(CORO_DEFAULT_STACK_SIZE))
-		: func()
-		, stack(std::move(stack))
-		, stack_context(this->stack.get(), this->stack.size(), &coroutine_start, this)
-		, run_state(UNINITIALIZED)
-	{
-	}
-	coroutine(func::movable_function<void (self &)> func, coroutine_stack stack = coroutine_stack(CORO_DEFAULT_STACK_SIZE))
-		: func(std::move(func))
-		, stack(std::move(stack))
-		, stack_context(this->stack.get(), this->stack.size(), &coroutine_start, this)
-		, run_state(NOT_STARTED)
-	{
-	}
-	~coroutine()
-	{
-		CORO_ASSERT(run_state != RUNNING);
-	}
+	explicit coroutine(coroutine_stack stack = coroutine_stack(CORO_DEFAULT_STACK_SIZE));
+	coroutine(func::movable_function<void (self &)> func, coroutine_stack stack = coroutine_stack(CORO_DEFAULT_STACK_SIZE));
+	~coroutine();
 
-	void reset(func::movable_function<void (self &)> func)
-	{
-		CORO_ASSERT(run_state != RUNNING);
-		stack_context.reset(stack.get(), stack.size(), &coroutine_start, this);
-		run_state = NOT_STARTED;
-		this->func = std::move(func);
-	}
+	void reset(func::movable_function<void (self &)> func);
 
 #ifdef CORO_NO_EXCEPTIONS
 	void operator()()
